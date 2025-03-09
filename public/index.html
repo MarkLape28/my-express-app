@@ -3,9 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Static File</title>
+    <title>Item Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 10px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+        button {
+            padding: 10px 15px;
+            margin-left: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: white;
+            padding: 10px;
+            margin: 5px auto;
+            width: 300px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello from a static file!</h1>
+
+    <h1>Item Manager</h1>
+    <form id="item-form">
+        <label for="item-input" class="sr-only">Add an item:</label>
+        <input type="text" id="item-input" placeholder="Enter item..." required>
+        <button type="submit" id="add-btn" disabled>Add</button>
+    </form>
+    <ul id="item-list"></ul>
+
+    <script>
+        const form = document.getElementById('item-form');
+        const input = document.getElementById('item-input');
+        const list = document.getElementById('item-list');
+        const addButton = document.getElementById('add-btn');
+
+        // Enable button only if input has value
+        input.addEventListener('input', () => {
+            addButton.disabled = !input.value.trim();
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const item = input.value.trim();
+            if (item) {
+                await fetch('/items', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item })
+                });
+                input.value = '';
+                addButton.disabled = true;
+                loadItems();
+            }
+        });
+
+        async function loadItems() {
+            const response = await fetch('/items');
+            const items = await response.json();
+            list.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+        }
+
+        loadItems();
+    </script>
+
 </body>
 </html>
